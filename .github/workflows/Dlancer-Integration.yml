@@ -1,0 +1,36 @@
+name: Dlancer-Integration-Workflow
+
+on:
+  workflow_dispatch:
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  submit:
+    name: Fetch, Test & Merge
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ github.event.pull_request.head.ref }}
+        fetch-depth: 0
+
+    - name: Fetch Driver
+      run: >-
+        curl -s -o expEnv.py "https://raw.githubusercontent.com/Dlancer-org/Collaboration-scripts/master/expEnv.py";
+        chmod +x expEnv.py;
+        python3 expEnv.py --prTitle ${{ github.event.pull_request.title }};
+
+    - name: Install dependencies
+      run: $DEP_INSTALL_CMD
+
+    - name: Run tests
+      run: $TEST_RUNNER
+    
+    - name: Commit Test Cases & Merge
+      if: success()
+      run: >-
+        curl -s -o handleSubmit.py "https://raw.githubusercontent.com/Dlancer-org/Collaboration-scripts/master/handleSubmit.py";
+        chmod +x handleSubmit.py;
+        python3 handleSubmit.py --repoDetails ${{ github.repository }} --prDescription ${{ github.event.pull_request.body }} --prNumber ${{ github.event.pull_request.number }} --prAuthor ${{ github.event.pull_request.user.login }};
