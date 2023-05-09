@@ -9,30 +9,30 @@ jobs:
   submit:
     name: Fetch, Test & Merge
     runs-on: ubuntu-latest
+    env:
+      host: ""
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
       with:
         ref: ${{ github.event.pull_request.head.ref }}
         fetch-depth: 0
-    - name: Setup  env variables
-      run: echo -e "prTitle=${{ github.event.pull_request.title }}\nrepoDetails=${{github.repository}}\nprDescription=${{github.event.pull_request.body}}\nprNumber=${{github.event.pull_request.number}}\nprAuthor=${{github.event.pull_request.user.login}}" >> $GITHUB_ENV
 
     - name: Fetch Driver
       run: >-
         curl -s -o expEnv.py "https://raw.githubusercontent.com/Dlancer-org/Collaboration-scripts/master/expEnv.py";
         chmod +x expEnv.py;
-        python3 expEnv.py;
+        python3 expEnv.py --prTitle "${{ github.event.pull_request.title }}";
 
     - name: Install dependencies
-      run: $DEP_INSTALL_CMD
+      run: sh ./dep_ins.sh
 
     - name: Run tests
-      run: $TEST_RUNNER
+      run: sh ./test.sh
     
     - name: Commit Test Cases & Merge
       if: success()
       run: >-
         curl -s -o handleSubmit.py "https://raw.githubusercontent.com/Dlancer-org/Collaboration-scripts/master/handleSubmit.py";
         chmod +x handleSubmit.py;
-        python3 handleSubmit.py;
+        python3 handleSubmit.py --repoDetails "${{ github.repository }}" --prDescription "${{ github.event.pull_request.body }}" --prNumber "${{ github.event.pull_request.number }}" --prAuthor "${{ github.event.pull_request.user.login }}";
