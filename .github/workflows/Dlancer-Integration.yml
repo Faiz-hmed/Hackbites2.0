@@ -31,7 +31,7 @@ jobs:
     - name: Handle Installation Errors
       if: failure()
       run: >-
-        python3 handleFailure.py --repoDetails "${{ github.repository }}" --prNumber "${{ github.event.pull_request.number }}" --step 1;
+        python3 handleFailure.py --repoDetails "${{ github.repository }}" --prNum "${{ github.event.pull_request.number }}" --step 1;
 
     - name: Run tests
       run: sh ./test.sh
@@ -39,11 +39,11 @@ jobs:
     - name: Handle Test Errors
       if: failure()
       run: >-
-        python3 handleFailure.py --repoDetails "${{ github.repository }}" --prNumber "${{ github.event.pull_request.number }}" --step 2;
+        python3 handleFailure.py --repoDetails "${{ github.repository }}" --prNum "${{ github.event.pull_request.number }}" --step 2;
     
     - name: Commit Test Cases & Merge
       if: success()
       run: >-
         curl -s -o handleSubmit.py "https://raw.githubusercontent.com/Dlancer-org/Collaboration-scripts/master/handleSubmit.py";
         chmod +x handleSubmit.py;
-        python3 handleSubmit.py --repoDetails "${{ github.repository }}" --prDescription "${{ github.event.pull_request.body }}" --prNumber "${{ github.event.pull_request.number }}" --prAuthor "${{ github.event.pull_request.user.login }}";
+        python3 handleSubmit.py --repoDetails "${{ github.repository }}" --prDescription "${{ github.event.pull_request.body }}" --prNum "${{ github.event.pull_request.number }}" --prAuthor "${{ github.event.pull_request.user.login }}";
